@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <meta http-equiv="refresh" content="10" />
+    <title>Gestionnaire parking rennais</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+      integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+      crossorigin=""
+    />
+  </head>
+
+  <body>
+    <h1>Rennes - Parking</h1>
+    <div id="mapid" style="height: 690px;"></div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+      integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+      crossorigin=""
+    ></script>
+    <script>
+      var map = L.map("mapid").setView([48.117266, -1.6777926], 13);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+        var parks = {{parkings | safe}};
+        var features = {{features | safe}};
+        var array = [];
+
+      for(let i=0; i<parks.length; i++) {
+        array.push({
+              "x": features[i]['x'],
+              "y": features[i]['y'],
+              "name": parks[i]['name'],
+              "status": parks[i]['status'],
+              "max": parks[i]['max'],
+              "free": parks[i]['free']
+          });
+      }
+
+      array.forEach( value => {
+
+          if (value.status === 'AVAILABLE') {
+            value.status = "<span style='color:#00c853'>Ouvert</span>"
+          } else  if (value.status === 'FULL') {
+            value.status = "<span style='color:#ffab00'>Complet</span>"
+          } else {
+            value.status = "<span style='color:#d50000'>Fermé</span>"
+          }
+
+          let str = value.name + ": <b>" + value.status + "</b><br>Places disponibles: " + value.free + "/" + value.max;
+          L.marker([ value.x , value.y])
+          .addTo(map)
+          .bindPopup(str)
+          .openPopup();
+      });
+    </script>
+  </body>
+</html>
